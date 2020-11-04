@@ -1,0 +1,842 @@
+=========================================
+1.
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
+int main(){
+
+  int fdread,fdwrite,bytesread,byteswrite;
+  char buf[30];
+  size_t len=30;
+ 
+  fdread=open("readfile.txt",O_RDONLY);
+  fdwrite=open("writefile.txt",O_RDWR|O_CREAT|O_TRUNC,664);
+ 
+ 
+  printf("the fd of file is %d and %d \n",fdread,fdwrite);
+ 
+ 
+ 
+ 
+ 
+while((bytesread=read(fdread,&buf,len))>0){
+byteswrite=write(fdwrite,&buf,bytesread);
+
+printf("bytes read is %d \n and bytes written is %d \n",bytesread,byteswrite);
+
+getchar();
+
+}
+
+
+close(fdread);
+close(fdwrite);
+
+
+}
+=============================================
+2.
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
+int main(){
+
+int fdread,fdwrite,bytesread,byteswritten;
+char buf[20];
+
+
+  fdread=0;
+  fdwrite=dup2(fdread,1);
+ 
+ 
+  printf("the fd of file is %d and %d \n",fdread,fdwrite);
+ 
+ 
+  bytesread=read(fdread,&buf,10);
+  printf("the read is %s\n ",buf);
+  getchar();
+  byteswritten=write(fdwrite,&buf,10);
+  printf("the sec read is %s \n",buf);
+ 
+  close(fdread);
+  close(fdwrite);
+  getchar();
+  }
+ ===================
+3.
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+
+int main(){
+
+int fd1,fd2,r,pos;
+char buf[300];
+fd1=open("abc.txt",O_RDONLY);
+fd2=dup(fd1);
+printf("the fd is %d and %d",fd1,fd2);
+
+r= read(fd1,&buf,100);
+printf("bytes read %d\n",r);
+r=read(fd2,&buf,10);
+printf("bytes read %d\n",r);
+r=read(fd1,&buf,100);
+printf("bytes read %d\n",r);
+pos=lseek(fd1,0,SEEK_CUR);
+printf("pos %d\n",pos);
+r=read(fd2,&buf,10);
+printf("bytes read %d\n",r);
+pos=lseek(fd2,0,SEEK_CUR);
+printf("pos %d\n",pos);
+}
+pos 110
+pos 120
+==========================
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int filecopy(int fd1,int fd2,int c){
+int r,w;
+char *buf= (char*)malloc(c*sizeof(char));
+
+while((r=read(fd1,buf,c))>0){
+   w=write(fd2,buf,c);
+}
+free(buf);
+return 1;
+}
+
+int main(int argc,char * argv[]){
+
+int fd1,fd2,bufsize=1,r;
+
+if(argc<2)
+{
+fd1=0;
+fd2=1;
+}
+else{
+  fd1=open(argv[1],O_RDONLY);
+  fd2=1;
+  }
+ 
+ r=filecopy(fd1,fd2,bufsize);
+ 
+ if(r==1)
+ printf("success");
+}
+
+==================================================
+#include <stdio.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
+int main(){
+int pid,status,n=0;
+pid=fork();
+if(pid==0){
+printf("the child process\n");
+return(-1);
+
+}
+if(pid!=0 && pid!=-1){
+printf("parent process with pid :%d\n",getpid());
+wait(&status);
+printf("the child status is %d \n ",status);
+}
+
+}
+====================================
+6.
+#include <stdio.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
+int main(){
+int status,n=4,ret,c;
+pid_t pid[n];
+for(int i=0;i<n;i++){
+pid[i]=fork();
+if(pid==0){
+printf("the child process\n");
+c=rand()%10;
+printf("random no is %d",c);
+sleep(c);
+
+}
+if(pid[i]!=0 && pid[i]!=-1){
+printf("parent process with pid :%d and child pid is %d \n",getpid(),pid[i]);
+ret=waitpid(pid[i],&status,0);
+printf("the child status is %d and return is %d \n ",status,ret);
+}
+
+}
+
+}
+============================
+8.
+#include <stdio.h>
+#include <stdlib.h>
+
+int x=10;
+
+int main(){
+int y=6;
+int static c=9;
+
+int*=(int*)malloc(7*sizeof(int));
+
+
+
+printf("the global %d ,local %d , static %d ,malloc nu %d \n",y,c,a[1]);
+
+
+}
+====================
+9.
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+
+void sighandler(int signum){
+printf("signal hanlder caught signal %d",signum);
+}
+
+int main(){
+
+printf("GOing to catch the signal\n");
+signal(SIGINT,sighandler);
+getchar();
+printf("caught the int signal");
+
+signal(SIGTERM,sighandler);
+getchar();
+printf("caught sigterm");
+
+signal(SIGQUIT,sighandler);
+getchar();
+printf("caught the sig quit");
+
+
+}
+===============
+10
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+void sighandler(int signum){
+printf("signal hanlder caught signal %d and process id is %d, the recieved sgnal %s\n",signum,getpid(),sys_siglist[signum]);
+}
+
+int main(){
+
+int pid1,pid2;
+
+pid1=fork();
+
+if(pid1==0){
+printf("child1 process pid %d and parent pid %d\n",getpid(),getppid());
+for(;;);
+}
+
+if(pid1!=0 && pid1!=-1){
+
+
+pid2=fork();
+if(pid2!=0 && pid2!=-1){
+
+printf("parent process\n");
+signal(SIGINT,sighandler);
+printf("sending int to first one");
+getchar();
+kill(pid1,SIGINT);
+printf("sending int to second one");
+getchar();
+kill(pid2,SIGINT);
+getchar();
+printf("sending int to parent one");
+raise(SIGINT);
+printf("caught sigterm");}
+}
+
+
+
+if(pid2==0){
+printf("child 2 process  pid %d and parent pid %d\n",getpid(),getppid());
+for(;;);
+}
+
+
+}
+===========
+11.
+#include <stdio.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc,char *argv[]){
+
+int pid1,pid2,status,fd[2];
+
+char *argv1[]={"cat","child.c",NULL};
+char *argv2[]={"less",NULL};
+pipe(fd);
+pid1=fork();
+if(pid1==0)
+{
+printf("child1 process");
+close(fd[0]);
+dup2(fd[1],STDOUT_FILENO);
+execvp(argv1[0],argv1);
+}
+pid2=fork();
+
+if(pid2==0){
+printf("child2 process\n");
+close(fd[1]);
+dup2(fd[0],STDIN_FILENO);
+execvp(argv2[0],argv2);
+
+}
+waitpid(pid1,&status,0);
+waitpid(pid2,&status,0);
+
+
+}
+========================
+11.
+#include <stdio.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
+int main(){
+int pid1,pid2,fd[2],status,ret;
+char *argv1[]={"cat","/usr/include/sysexits.h",NULL};
+char *argv2[]={"less",NULL};
+
+pid1=fork();
+ret=pipe(fd);
+if(pid1==0){
+printf("child writing process process\n");
+close(fd[0]);
+dup2(fd[0],STDOUT_FILENO);
+execvp(argv1[0],argv1);
+}
+pid2=fork();
+if(pid2==0){
+printf("reading process\n");
+close(fd[1]);
+dup2(fd[0],STDIN_FILENO);
+execvp(argv2[0],argv2);
+
+}
+
+waitpid(pid1,&status,0);
+waitpid(pid2,&status,0);
+}
+==========================
+12.
+
+writing into pipe:
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
+int main(){
+
+int fdwrite;
+mkfifo("fifo",0664);
+char message[100];
+
+while(1){
+fdwrite=open("fifo",O_WRONLY);
+       fgets(message,100,stdin);
+write(fdwrite,message,sizeof(message));
+printf("%s \n",message);
+}
+}
++++++++++++++++++++++
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+int main(){
+int fdread;
+char readbuffer[100];
+while(1){
+fdread=open("fifo",O_RDONLY);
+read(fdread,readbuffer,sizeof(readbuffer));
+printf("read from second  file:%s \n",readbuffer);
+}
+
+}
++++++++++++++++
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+int main(){
+int fdread;
+char readbuffer[100];
+while(1){
+fdread=open("fifo",O_RDONLY);
+read(fdread,readbuffer,sizeof(readbuffer));
+printf("read from first file:%s \n",readbuffer);}
+
+}
+==================================
+13.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
+int main(){
+
+int fdwrite,ret;
+char writebuffer[50];
+mkfifo("fifo",0666);
+
+while(1){
+fdwrite=open("fifo",O_WRONLY);
+fgets(writebuffer,50,stdin);
+ret=write(fdwrite,writebuffer,sizeof(writebuffer));
+printf("the number of bytes written is %d and wrote %s \n",ret,writebuffer);
+
+}
+}
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
+int main(){
+
+int fdwrite,ret;
+char writebuffer[50];
+
+
+while(1){
+fdwrite=open("fifo",O_WRONLY);
+fgets(writebuffer,50,stdin);
+ret=write(fdwrite,writebuffer,sizeof(writebuffer));
+printf("the number of bytes written is %d and wrote %s \n",ret,writebuffer);
+
+}
+}
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
+int main(){
+
+int fdread,ret;
+char readbuffer[50];
+
+
+while(1){
+fdread=open("fifo",O_RDONLY);
+
+ret=read(fdread,readbuffer,sizeof(readbuffer));
+printf("the number of bytes read is %d and read %s \n",ret,readbuffer);
+
+}
+}
+
+===============
+14.
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/msg.h>
+#include <sys/ipc.h>
+#include <sys/types.h>
+
+#define PERMS 0666
+
+int main(int argc,char* argv[]){
+
+   struct msg{
+    long mtype;
+    char data[10];
+   }msgread;
+   
+   int msgid,key;
+   
+   key=ftok(".",10);
+   
+   msgid=msgget(key,PERMS | IPC_CREAT);
+   printf("The msg q id is %d\n",msgid);
+   
+   
+   if(argc==2){
+    msgread.mtype=atol(argv[1]);  
+    printf("%s typearg:\n",argv[1]); msgrcv(msgid,&msgread,sizeof(msgread.data),msgread.mtype,IPC_NOWAIT);          
+    printf("message recv is %s\n",msgread.data);
+   }else{
+    msgrcv(msgid,&msgread,sizeof(msgread.data),0,IPC_NOWAIT);
+    printf("message recv is %s\n",msgread.data);
+   
+   }
+}
+
+=======================
+#include <stdio.h>
+#include <string.h>
+#include <sys/msg.h>
+#include <sys/ipc.h>
+
+#define PERMS 0666
+
+int main(){
+
+int i,key,msgid;
+
+struct msg{
+    long mtype;
+    char data[10];
+    }msgwrite;
+   
+key=ftok(".",10);
+msgid=msgget(key,PERMS | IPC_CREAT);
+
+printf("The message queue id is %d\n",msgid);
+
+for(int i=0;i<=2;i++){
+printf("Enter the msg type:\n");
+scanf("%ld",&msgwrite.mtype);
+printf("Enter the data\n");
+scanf("%s",msgwrite.data);
+msgsnd(msgid,&msgwrite,sizeof(msgwrite.data),IPC_NOWAIT);
+printf("msg:%s\n ",msgwrite.data);
+}
+
+}
+
+
+================================================
+15.
+
+server.c
+-------------
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int main(){
+
+	int sockfd, ret;
+	struct sockaddr_in server_addr;
+	
+	int newsockfd;
+	struct sockaddr_in new_addr;
+    
+	FILE *fp;
+	char data[1024]={0};
+	char filename[32]={0};
+	
+	char *ip = "127.0.0.1";
+	int port = 8080;
+	int opt=1;
+	
+	socklen_t addr_size;
+	
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    	if(sockfd < 0){
+        	printf("Error in connection.\n");
+        	exit(1);
+    	}
+    	printf("server socket created successfully.\n");
+	
+	if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,sizeof(opt))){
+		perror("set\n");
+		exit(1);
+	}
+	
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = port;
+	server_addr.sin_addr.s_addr =inet_addr(ip);
+	
+	ret = bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+	if(ret < 0){
+		perror("error in bind\n");
+		exit(1);
+	}
+	printf("Binding Successful\n");
+	
+	if(listen(sockfd, 10) == 0){
+		printf("Listening \n");
+	}else{
+		perror("Error in Listening \n");
+		exit(1);
+	}
+	
+	newsockfd = accept(sockfd, (struct sockaddr*)&new_addr, &addr_size);
+	if(newsockfd < 0){
+		printf("Error accept \n");
+		exit(1);
+	}
+		
+	ret = recv(newsockfd, filename, 32, 0);
+		if(ret <= 0){
+			printf("Error \n");
+			exit(1);
+		}
+	printf("%s\n", filename);
+	
+	fp = fopen(filename, "w");
+	if(fp == NULL)
+		printf("Error");
+	printf("Writing to file\n");
+	
+	while(1){
+		ret = recv(newsockfd, data, 1024, 0);
+		if(ret <= 0){
+			printf("exiting\n");
+			break;	
+		}
+		fprintf(fp ,"%s", data);
+		printf("data : %s\n",data);
+		bzero(data,1024);
+	}
+	
+	printf("Data written in the file\n");
+	
+	return 0;
+
+		
+}
+
+client
+-----------------
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int main(int argc, char* argv[]){
+	
+	char *ip = "127.0.0.1";
+	int port = 8080;
+	int ret;
+	
+	int sockfd;
+	struct sockaddr_in server_addr;
+	int sockfd_new;
+	
+	FILE *fp;
+	char *filename = argv[1];
+	char data[1024] = {0};
+	char filename1[32];
+	
+	printf("%s :file name\n",argv[0]);
+	printf("%s :next file\n ",argv[1]);
+	
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if(sockfd < 0){
+		perror("Error in socket\n");
+		exit(1);
+	}
+	printf("server socket created successfully.\n");
+	
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = port;
+	server_addr.sin_addr.s_addr =inet_addr(ip);
+	
+	ret = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+	if(ret == -1){
+		perror("Error in socket\n");
+		exit(1);
+	}
+	printf("Connected to Server\n");
+	
+	printf("enter the text file\n");
+	scanf("%s",filename1);
+	if(send(sockfd, filename1, sizeof(filename1), 0) == -1){
+			perror("Error in sending file \n");
+			exit(1);
+		
+	}
+	printf("%s \n", filename1);
+	
+	fp = fopen(filename, "r");
+	if(fp == NULL){
+		perror("Error in reading file\n");
+		exit(1);
+	}
+	
+	while(fgets(data, 1024, fp) != NULL){
+		if(send(sockfd, data, sizeof(data), 0) == -1){
+			perror("Error in sending file \n");
+			exit(1);
+		
+		}
+		printf("%s ",data);
+		bzero(data, 1024);
+	}
+	
+		
+	printf("\nFile data sent successfully\n");
+	printf("Closing the connection\n");
+	close(sockfd);
+	
+}
+====================================================
+
+q.16
+
+reader.c
+-----------
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+
+int main(){
+	
+	int key,shmid;
+	void *shmptr;
+	char data[512]={0};
+	char *filename="new.txt";
+	int fp;
+	int ret,*size;
+	
+	key = ftok(".",10);
+	shmid = shmget(key,1024,0);
+	if(shmid < 0){
+		printf("error\n");
+		exit(1);
+	}
+	
+	printf("the shared mem segment id is %d \n",shmid);
+	shmptr=shmat(shmid,0,0);
+	size=(int*)(shmptr);
+	printf("%d size\n",*size);
+	shmptr=(int*)shmptr+1;
+	
+	fp = open(filename, O_WRONLY | O_CREAT ,0666);
+	if(fp == -1)
+		perror("Error\n");
+	printf("Writing to file\n");
+	
+	//printf("data : %s\n",shmptr);
+	ret = write(fp,shmptr,*size);
+	printf("written %d",ret);
+	
+	shmdt(shmptr);
+}
+	
+
+writer.c
+----------
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+int main(){
+	
+	int key,shmid;
+	void *shmptr;
+	char *filename="new.c";
+	int fp;
+	int ret;
+	int count=0;
+	key = ftok(".",10);
+	int size;
+	
+	struct stat filestat;
+	
+	fp = open(filename, O_RDONLY);
+	if(fp < 0){
+		perror("Error in reading file\n");
+		exit(1);
+	}
+	
+	if(fstat(fp,&filestat) != 0){
+	 	perror("stat failed");
+	 	exit(1);
+	 }
+	 printf("%ld size:\n",filestat.st_size);
+	 size =filestat.st_size;
+	 
+	 
+	shmid = shmget(key,1024,IPC_CREAT|0644);
+	if(shmid < 0){
+		printf("error1\n");
+		exit(1);
+	}
+	
+	printf("the shared mem segment id is %d \n",shmid);
+	shmptr= shmat(shmid,0,0);
+	printf("addr %p: \n",(void*) &shmptr);
+	
+	*(int *)shmptr=size;
+	printf("%d\n",*(int*)shmptr);
+	shmptr=(int*)shmptr+1;
+	printf("addr %p: \n",(void*) &shmptr);
+	ret=read(fp,shmptr,size);
+	printf("bytes_read:%d\n",ret);
+	printf("shmptr :%s\n",(char*)shmptr);
+	printf("addr %p: \n",(void*) &shmptr);
+	shmdt(shmptr);
+	
+	
+}
+
